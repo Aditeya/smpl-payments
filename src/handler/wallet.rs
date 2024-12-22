@@ -43,7 +43,7 @@ pub async fn update_wallet(
             match state.smpldb.deposit(user_id, amount).await {
                 Ok(wallet) => (StatusCode::OK, Json(wallet)).into_response(),
                 Err(e) => {
-                    tracing::error!(?e, user_id, "Failed to create new wallet for user");
+                    tracing::error!(?e, user_id, "Failed to deposit funds wallet for user");
                     (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
                 }
             }
@@ -55,7 +55,7 @@ pub async fn update_wallet(
                     (StatusCode::BAD_REQUEST, "Insufficient Funds").into_response()
                 }
                 Err(e) => {
-                    tracing::error!(?e, user_id, "Failed to create new wallet for user");
+                    tracing::error!(?e, user_id, "Failed to withdraw funds from wallet for user");
                     (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
                 }
             }

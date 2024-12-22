@@ -3,6 +3,7 @@ pub mod models;
 mod schema;
 mod users;
 mod wallet;
+mod transaction;
 use diesel::{result::DatabaseErrorKind, Connection, PgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 pub use error::Error;

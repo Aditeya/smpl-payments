@@ -1,0 +1,22 @@
+meta {
+  name: Get Transactions
+  type: http
+  seq: 11
+}
+
+get {
+  url: http://localhost:3000/transactions/1
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+body:json {
+  {
+    "to_username": "aaaa",
+    "amount": "10.00"
+  }
+}

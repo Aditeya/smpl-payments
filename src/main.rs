@@ -55,8 +55,9 @@ async fn main() {
         .route("/profile", put(handler::profile::update_profile))
         .route("/wallet", get(handler::wallet::get_wallet))
         .route("/wallet", put(handler::wallet::update_wallet))
-        // .route("/transactions", todo!())
-        // .route("/transactions/:id", todo!())
+        .route("/transactions/:id", get(handler::transaction::get_transaction_by_id))
+        .route("/transactions", post(handler::transaction::create_transaction))
+        .route("/transactions", get(handler::transaction::list_transactions))
         .with_state(state)
         .layer((
             TraceLayer::new_for_http(),

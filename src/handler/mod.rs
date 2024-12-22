@@ -8,6 +8,7 @@ pub mod sign_in;
 pub mod sign_up;
 pub mod profile;
 pub mod wallet;
+pub mod transaction;
 
 fn validate_email(email: &str) -> Option<Response> {
     if !EmailAddress::is_valid(email) {

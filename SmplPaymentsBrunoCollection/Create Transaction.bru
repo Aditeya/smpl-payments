@@ -1,0 +1,22 @@
+meta {
+  name: Create Transaction
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://localhost:3000/transactions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+body:json {
+  {
+    "to_username": "bbbb",
+    "amount": "10.00"
+  }
+}

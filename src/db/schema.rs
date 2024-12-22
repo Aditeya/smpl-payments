@@ -1,6 +1,16 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    transaction (id) {
+        id -> Int4,
+        from_wallet -> Int4,
+        to_wallet -> Int4,
+        amount -> Numeric,
+        created_at -> Nullable<Timestamptz>,
+    }
+}
+
+diesel::table! {
     users (id) {
         id -> Int4,
         #[max_length = 120]
@@ -29,6 +39,7 @@ diesel::table! {
 diesel::joinable!(wallet -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    transaction,
     users,
     wallet,
 );

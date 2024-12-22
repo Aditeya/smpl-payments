@@ -28,3 +28,14 @@ pub struct Wallet {
     pub created_at: Option<DateTime<Utc>>,
     pub updated_at: Option<DateTime<Utc>>,
 }
+
+#[derive(Debug, Queryable, Selectable, Serialize)]
+#[diesel(table_name = super::schema::transaction)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct Transaction {
+    pub id: i32,
+    pub from_wallet: i32,
+    pub to_wallet: i32,
+    pub amount: BigDecimal,
+    pub created_at: Option<DateTime<Utc>>,
+}
