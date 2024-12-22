@@ -1,0 +1,15 @@
+services:
+  smpl_db:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=smpl
+      - POSTGRES_PASSWORD=smplpword
+      - POSTGRES_DB=smpldb
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/smpl/postgresql/data
+
+volumes:
+  pgdata:

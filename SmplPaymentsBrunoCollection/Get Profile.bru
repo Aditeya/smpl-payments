@@ -1,0 +1,22 @@
+meta {
+  name: Get Profile
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:3000/profile
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+body:json {
+  {
+    "email": "a@a.com",
+    "password": "aaaa"
+  }
+}

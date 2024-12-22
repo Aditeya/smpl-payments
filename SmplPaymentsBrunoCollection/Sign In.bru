@@ -1,0 +1,23 @@
+meta {
+  name: Sign In
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:3000/sign_in
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "a@a.com",
+    "password": "aaaa"
+  }
+}
+
+script:post-response {
+  bru.setVar("jwt", res.body);
+  
+}

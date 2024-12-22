@@ -1,0 +1,21 @@
+meta {
+  name: Update Profile
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:3000/profile
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+body:json {
+  {
+    "username": "aaaa"
+  }
+}
