@@ -28,9 +28,9 @@ fn validate_n_hash_password(password: &str) -> Result<String, Response> {
         Ok(p) => Ok(p),
         Err(e) => {
             tracing::error!(?e, "Error hashing password");
-            return Err(
+            Err(
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
-            );
+            )
         }
     }
 }

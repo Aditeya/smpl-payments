@@ -29,7 +29,7 @@ where
             return Err((StatusCode::BAD_REQUEST, "Invalid Token"));
         };
 
-        validate_jwt(&unvalidated_token).map(|id| ValidateAuth(id))
+        validate_jwt(unvalidated_token).map(ValidateAuth)
     }
 }
 
@@ -64,9 +64,9 @@ pub fn issue_new_jwt(id: i32) -> Result<String, Response> {
         Ok(t) => Ok(t.as_str().to_string()),
         Err(e) => {
             tracing::error!(?e, "Failed to sign token with key");
-            return Err(
+            Err(
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
-            );
+            )
         }
     }
 }
