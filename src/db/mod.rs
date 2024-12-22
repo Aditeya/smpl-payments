@@ -1,9 +1,9 @@
 mod error;
 pub mod models;
 mod schema;
+mod transaction;
 mod users;
 mod wallet;
-mod transaction;
 use diesel::{result::DatabaseErrorKind, Connection, PgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 pub use error::Error;
@@ -19,9 +19,11 @@ use diesel_async::{
 
 fn handle_duplicate_error(e: diesel::result::Error) -> Error {
     match e {
-        diesel::result::Error::DatabaseError(DatabaseErrorKind::UniqueViolation, _) => Error::Duplicate,
-        diesel::result::Error::RollbackTransaction=>Error::RollbackTransaction,
-        e => Error::DieselFailure(e)
+        diesel::result::Error::DatabaseError(DatabaseErrorKind::UniqueViolation, _) => {
+            Error::Duplicate
+        }
+        diesel::result::Error::RollbackTransaction => Error::RollbackTransaction,
+        e => Error::DieselFailure(e),
     }
 }
 

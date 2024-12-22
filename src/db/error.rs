@@ -10,5 +10,5 @@ pub enum Error {
     #[error("Unique Violation in DB")]
     Duplicate,
     #[error("Transaction was rolled back")]
-    RollbackTransaction
+    RollbackTransaction,
 }

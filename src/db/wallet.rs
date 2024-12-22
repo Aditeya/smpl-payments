@@ -3,7 +3,7 @@ use chrono::Utc;
 use diesel::{prelude::AsChangeset, ExpressionMethods, Insertable, QueryDsl, SelectableHelper};
 use diesel_async::{scoped_futures::ScopedFutureExt, AsyncConnection, RunQueryDsl};
 
-use super::{handle_duplicate_error, models::Wallet, schema::wallet , Error, SmplDB};
+use super::{handle_duplicate_error, models::Wallet, schema::wallet, Error, SmplDB};
 
 #[derive(Insertable, AsChangeset)]
 #[diesel(table_name = wallet)]
@@ -14,14 +14,10 @@ pub struct NewWallet {
 }
 
 impl SmplDB {
-    pub async fn create_wallet(
-        &self,
-        user_id: i32,
-    ) -> Result<Wallet, Error> {
+    pub async fn create_wallet(&self, user_id: i32) -> Result<Wallet, Error> {
         let wallet = NewWallet {
             user_id,
-            balance: BigDecimal::from_u8(0)
-                .expect("couldn't create BigDecimal 0"),
+            balance: BigDecimal::from_u8(0).expect("couldn't create BigDecimal 0"),
             status: true,
         };
 
@@ -34,81 +30,81 @@ impl SmplDB {
             .map_err(handle_duplicate_error)
     }
 
-    pub async fn deposit(
-        &self,
-        user_id: i32,
-        amount: BigDecimal
-    ) -> Result<Wallet, Error> {
+    pub async fn deposit(&self, user_id: i32, amount: BigDecimal) -> Result<Wallet, Error> {
         let mut conn = self.get_conn().await?;
-        conn.transaction(|conn| async move {
-            // Lock the wallet row for update
-            let (id, balance): (i32, BigDecimal) = wallet::table
-                .filter(wallet::user_id.eq(user_id))
-                .select((wallet::id, wallet::balance))
-                .for_update() // Lock the row
-                .first(conn)
-                .await?;
+        conn.transaction(|conn| {
+            async move {
+                // Lock the wallet row for update
+                let (id, balance): (i32, BigDecimal) = wallet::table
+                    .filter(wallet::user_id.eq(user_id))
+                    .select((wallet::id, wallet::balance))
+                    .for_update() // Lock the row
+                    .first(conn)
+                    .await?;
 
-            // Update the balance
-            let now = Utc::now();
-            Ok(diesel::update(wallet::table.find(id))
+                // Update the balance
+                let now = Utc::now();
+                Ok(diesel::update(wallet::table.find(id))
                     .set((
                         wallet::balance.eq(balance + amount),
-                        wallet::updated_at.eq(now)
+                        wallet::updated_at.eq(now),
                     ))
                     .returning(Wallet::as_returning())
                     .get_result(conn)
                     .await?)
-        }.scope_boxed()).await
+            }
+            .scope_boxed()
+        })
+        .await
     }
 
-    pub async fn withdraw(
-        &self,
-        user_id: i32,
-        amount: BigDecimal
-    ) -> Result<Wallet, Error> {
+    pub async fn withdraw(&self, user_id: i32, amount: BigDecimal) -> Result<Wallet, Error> {
         let mut conn = self.get_conn().await?;
-        conn.transaction(|conn| async move {
-            // Lock the wallet row for update
-            let (id, balance): (i32, BigDecimal) = wallet::table
-                .filter(wallet::user_id.eq(user_id))
-                .select((wallet::id, wallet::balance))
-                .for_update() // Lock the row
-                .first(conn)
-                .await?;
+        conn.transaction(|conn| {
+            async move {
+                // Lock the wallet row for update
+                let (id, balance): (i32, BigDecimal) = wallet::table
+                    .filter(wallet::user_id.eq(user_id))
+                    .select((wallet::id, wallet::balance))
+                    .for_update() // Lock the row
+                    .first(conn)
+                    .await?;
 
-            if balance < amount {
-                return Err(diesel::result::Error::RollbackTransaction);
+                if balance < amount {
+                    return Err(diesel::result::Error::RollbackTransaction);
+                }
+
+                // Update the balance
+                let now = Utc::now();
+                diesel::update(wallet::table.find(id))
+                    .set((
+                        wallet::balance.eq(balance - amount),
+                        wallet::updated_at.eq(now),
+                    ))
+                    .returning(Wallet::as_returning())
+                    .get_result(conn)
+                    .await
             }
-
-            // Update the balance
-            let now = Utc::now();
-            diesel::update(wallet::table.find(id))
-                .set((
-                    wallet::balance.eq(balance - amount),
-                    wallet::updated_at.eq(now)
-                ))
-                .returning(Wallet::as_returning())
-                .get_result(conn)
-                .await
-        }.scope_boxed())
+            .scope_boxed()
+        })
         .await
         .map_err(handle_duplicate_error)
     }
 
-    pub async fn get_wallet(
-        &self,
-        user_id: i32,
-    ) -> Result<Wallet, Error> {
+    pub async fn get_wallet(&self, user_id: i32) -> Result<Wallet, Error> {
         let mut conn = self.get_conn().await?;
-        conn.transaction(|conn| async move {
-            // Lock the wallet row for reading
-            Ok(wallet::table
+        conn.transaction(|conn| {
+            async move {
+                // Lock the wallet row for reading
+                Ok(wallet::table
                     .filter(wallet::user_id.eq(user_id))
                     .select(Wallet::as_select())
                     .for_no_key_update() // Lock the row for reading
                     .first(conn)
                     .await?)
-        }.scope_boxed()).await
+            }
+            .scope_boxed()
+        })
+        .await
     }
 }

@@ -4,7 +4,6 @@ use serde::Deserialize;
 
 use crate::{utils::ValidateAuth, AppState};
 
-
 pub async fn get_wallet(
     ValidateAuth(user_id): ValidateAuth,
     State(state): State<AppState>,
@@ -39,25 +38,21 @@ pub async fn update_wallet(
     };
 
     match action {
-        UpdateWalletType::Deposit => {
-            match state.smpldb.deposit(user_id, amount).await {
-                Ok(wallet) => (StatusCode::OK, Json(wallet)).into_response(),
-                Err(e) => {
-                    tracing::error!(?e, user_id, "Failed to deposit funds wallet for user");
-                    (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
-                }
+        UpdateWalletType::Deposit => match state.smpldb.deposit(user_id, amount).await {
+            Ok(wallet) => (StatusCode::OK, Json(wallet)).into_response(),
+            Err(e) => {
+                tracing::error!(?e, user_id, "Failed to deposit funds wallet for user");
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
             }
         },
-        UpdateWalletType::Withdraw => {
-            match state.smpldb.withdraw(user_id, amount).await {
-                Ok(wallet) => (StatusCode::OK, Json(wallet)).into_response(),
-                Err(crate::db::Error::RollbackTransaction) => {
-                    (StatusCode::BAD_REQUEST, "Insufficient Funds").into_response()
-                }
-                Err(e) => {
-                    tracing::error!(?e, user_id, "Failed to withdraw funds from wallet for user");
-                    (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
-                }
+        UpdateWalletType::Withdraw => match state.smpldb.withdraw(user_id, amount).await {
+            Ok(wallet) => (StatusCode::OK, Json(wallet)).into_response(),
+            Err(crate::db::Error::RollbackTransaction) => {
+                (StatusCode::BAD_REQUEST, "Insufficient Funds").into_response()
+            }
+            Err(e) => {
+                tracing::error!(?e, user_id, "Failed to withdraw funds from wallet for user");
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
             }
         },
     }

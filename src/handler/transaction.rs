@@ -1,4 +1,9 @@
-use axum::{extract::{Path, State}, http::StatusCode, response::IntoResponse, Json};
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    response::IntoResponse,
+    Json,
+};
 use bigdecimal::BigDecimal;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -14,9 +19,16 @@ pub struct CreateTransaction {
 pub async fn create_transaction(
     ValidateAuth(user_id): ValidateAuth,
     State(state): State<AppState>,
-    Json(CreateTransaction { to_username, amount }): Json<CreateTransaction>,
+    Json(CreateTransaction {
+        to_username,
+        amount,
+    }): Json<CreateTransaction>,
 ) -> impl IntoResponse {
-    match state.smpldb.insert_payment(user_id, &to_username, amount).await {
+    match state
+        .smpldb
+        .insert_payment(user_id, &to_username, amount)
+        .await
+    {
         Ok(transaction) => (StatusCode::CREATED, Json(transaction)).into_response(),
         Err(crate::db::Error::RollbackTransaction) => {
             (StatusCode::BAD_REQUEST, "Insufficient Funds").into_response()
@@ -44,12 +56,13 @@ pub async fn get_transaction_by_id(
     match state.smpldb.get_transaction(user_id, transaction_id).await {
         Ok(Some((transaction, from_username, to_username))) => {
             let t = FormattedTransaction {
-                from_username, to_username,
+                from_username,
+                to_username,
                 amount: transaction.amount,
-                created_at: transaction.created_at.unwrap_or_default()
+                created_at: transaction.created_at.unwrap_or_default(),
             };
             (StatusCode::CREATED, Json(t)).into_response()
-        },
+        }
         Ok(None) => (StatusCode::GONE, "Transaction Not Found").into_response(),
         Err(e) => {
             tracing::error!(?e, user_id, "Failed to get transaction for user");

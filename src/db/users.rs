@@ -65,7 +65,7 @@ impl SmplDB {
             .filter(users::id.eq(id))
             .set((
                 users::username.eq(username),
-                users::updated_at.eq(Some(now))
+                users::updated_at.eq(Some(now)),
             ))
             .returning(User::as_returning())
             .get_result(&mut conn)

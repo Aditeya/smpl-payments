@@ -38,8 +38,4 @@ diesel::table! {
 
 diesel::joinable!(wallet -> users (user_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    transaction,
-    users,
-    wallet,
-);
+diesel::allow_tables_to_appear_in_same_query!(transaction, users, wallet,);

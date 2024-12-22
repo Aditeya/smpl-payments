@@ -1,13 +1,14 @@
+use axum::{
+    async_trait,
+    extract::FromRequestParts,
+    http::{header::AUTHORIZATION, request::Parts, StatusCode},
+    response::{IntoResponse, Response},
+};
 use chrono::{DateTime, Utc};
+use hmac::{Hmac, Mac};
 use jwt::{AlgorithmType, Header, SignWithKey, Token, VerifyWithKey};
 use serde::{Deserialize, Serialize};
-use hmac::{Hmac, Mac};
 use sha2::Sha384;
-use axum::{
-    async_trait, extract::FromRequestParts, http::{
-        header::AUTHORIZATION, request::Parts, StatusCode
-    }, response::{IntoResponse, Response},
-};
 
 /// Contains User ID
 pub struct ValidateAuth(pub i32);
@@ -23,11 +24,10 @@ where
         let Some(value) = parts.headers.get(AUTHORIZATION) else {
             return Err((StatusCode::BAD_REQUEST, "`Authorization` header is missing"));
         };
-        let Some(unvalidated_token) = value.to_str()
-            .ok()
-            .and_then(|k| k.strip_prefix("Bearer ")) else {
-                return Err((StatusCode::BAD_REQUEST, "Invalid Token"));
-            };
+        let Some(unvalidated_token) = value.to_str().ok().and_then(|k| k.strip_prefix("Bearer "))
+        else {
+            return Err((StatusCode::BAD_REQUEST, "Invalid Token"));
+        };
 
         validate_jwt(&unvalidated_token).map(|id| ValidateAuth(id))
     }
