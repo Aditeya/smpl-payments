@@ -5,7 +5,7 @@
 //! kill or ctrl-c
 //! ```
 
-use std::{sync::Arc, time::Duration};
+use std::{net::SocketAddr, sync::Arc, time::Duration};
 
 use axum::{routing::{get, post, put}, Router};
 use db::SmplDB;
@@ -14,6 +14,7 @@ use tokio::net::TcpListener;
 use tokio::signal;
 use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
+use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod handler;
@@ -41,6 +42,11 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer().without_time())
         .init();
 
+    let governor = GovernorConfigBuilder::default()
+        .per_second(5) // Allow 5 requests per second
+        .burst_size(10) // Allow bursts of up to 10 requests
+        .finish()
+        .unwrap();
 
     dotenv().ok();
     let db_url = std::env::var("DATABASE_URL").unwrap_or_default();
@@ -64,13 +70,16 @@ async fn main() {
             // Graceful shutdown will wait for outstanding requests to complete. Add a timeout so
             // requests don't hang forever.
             TimeoutLayer::new(Duration::from_secs(10)),
-        ));
+        )).layer(
+            GovernorLayer {config: governor.into()}
+        );
 
-    // Create a `TcpListener` using tokio.
-    let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    tracing::debug!("listening on {}", addr);
+    let listener = TcpListener::bind(addr).await.unwrap();
 
     // Run the server with graceful shutdown
-    axum::serve(listener, app)
+    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>())
         .with_graceful_shutdown(shutdown_signal())
         .await
         .unwrap();
