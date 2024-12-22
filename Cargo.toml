@@ -6,8 +6,9 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.94"
 axum = "0.7.9"
+bigdecimal = { version = "0.4.7", features = ["serde"] }
 chrono = { version = "0.4.39", features = ["serde"] }
-diesel = { version = "2.2.6", features = ["chrono", "postgres"] }
+diesel = { version = "2.2.6", features = ["chrono", "numeric", "postgres"] }
 diesel-async = { version = "0.5.2", features = ["tokio", "deadpool", "postgres"] }
 diesel_migrations = { version = "2.2.0", features = ["postgres"] }
 dotenvy = "0.15.7"

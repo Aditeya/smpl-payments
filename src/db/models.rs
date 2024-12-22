@@ -1,3 +1,4 @@
+use bigdecimal::BigDecimal;
 use chrono::{DateTime, Utc};
 use diesel::prelude::*;
 use serde::Serialize;
@@ -11,6 +12,18 @@ pub struct User {
     pub email: String,
     #[serde(skip)]
     pub password: String,
+    pub status: bool,
+    pub created_at: Option<DateTime<Utc>>,
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
+#[derive(Debug, Queryable, Selectable, Serialize)]
+#[diesel(table_name = super::schema::wallet)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct Wallet {
+    pub id: i32,
+    pub user_id: i32,
+    pub balance: BigDecimal,
     pub status: bool,
     pub created_at: Option<DateTime<Utc>>,
     pub updated_at: Option<DateTime<Utc>>,

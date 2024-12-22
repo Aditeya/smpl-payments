@@ -1,0 +1,22 @@
+meta {
+  name: Get Wallet
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:3000/wallet
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+body:json {
+  {
+    "email": "a@a.com",
+    "password": "aaaa"
+  }
+}

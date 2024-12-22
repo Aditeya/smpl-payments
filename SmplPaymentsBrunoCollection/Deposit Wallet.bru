@@ -1,0 +1,22 @@
+meta {
+  name: Deposit Wallet
+  type: http
+  seq: 7
+}
+
+put {
+  url: http://localhost:3000/wallet
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+body:json {
+  {
+    "action": "Deposit",
+    "amount": "10.00"
+  }
+}

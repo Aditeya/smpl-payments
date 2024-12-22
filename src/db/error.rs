@@ -9,4 +9,6 @@ pub enum Error {
     DieselFailure(#[from] diesel::result::Error),
     #[error("Unique Violation in DB")]
     Duplicate,
+    #[error("Transaction was rolled back")]
+    RollbackTransaction
 }

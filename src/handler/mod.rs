@@ -7,6 +7,7 @@ use email_address::EmailAddress;
 pub mod sign_in;
 pub mod sign_up;
 pub mod profile;
+pub mod wallet;
 
 fn validate_email(email: &str) -> Option<Response> {
     if !EmailAddress::is_valid(email) {

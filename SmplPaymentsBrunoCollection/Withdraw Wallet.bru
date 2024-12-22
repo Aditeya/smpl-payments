@@ -1,0 +1,22 @@
+meta {
+  name: Withdraw Wallet
+  type: http
+  seq: 8
+}
+
+put {
+  url: http://localhost:3000/wallet
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+body:json {
+  {
+    "action": "Withdraw",
+    "amount": "60.00"
+  }
+}

@@ -43,14 +43,29 @@ pub async fn sign_up(
 
     tracing::info!(username, email, "Creating user");
     // insert to db
-    match state.smpldb.sign_up_user(&username, &email, &password).await {
+    let user = match state.smpldb.sign_up_user(&username, &email, &password).await {
         Ok(u) => {
             tracing::info!(username, email, "Created user");
-            (StatusCode::CREATED, Json(u)).into_response()
+            u
+        },
+        Err(crate::db::Error::Duplicate) => {
+            return (StatusCode::BAD_REQUEST, "Username or Email Taken").into_response();
         },
         Err(e) => {
             tracing::error!(?e,username, email, "Error creating user");
-            (StatusCode::BAD_REQUEST, format!("{e:#?}")).into_response()
+            return (StatusCode::INTERNAL_SERVER_ERROR, format!("{e:#?}")).into_response();
+        },
+    };
+
+    match state.smpldb.create_wallet(user.id).await {
+        Ok(_wallet) => {
+            tracing::info!(username, email, "Wallet created");
+            (StatusCode::CREATED, Json(user)).into_response()
+        },
+        Err(e) => {
+            tracing::error!(?e,username, email, "Error creating user");
+            (StatusCode::INTERNAL_SERVER_ERROR, format!("{e:#?}")).into_response()
         },
     }
+
 }

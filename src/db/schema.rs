@@ -14,3 +14,21 @@ diesel::table! {
         updated_at -> Nullable<Timestamptz>,
     }
 }
+
+diesel::table! {
+    wallet (id) {
+        id -> Int4,
+        user_id -> Int4,
+        balance -> Numeric,
+        status -> Bool,
+        created_at -> Nullable<Timestamptz>,
+        updated_at -> Nullable<Timestamptz>,
+    }
+}
+
+diesel::joinable!(wallet -> users (user_id));
+
+diesel::allow_tables_to_appear_in_same_query!(
+    users,
+    wallet,
+);
