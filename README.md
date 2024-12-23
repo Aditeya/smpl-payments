@@ -1,6 +1,6 @@
 # Smpl Payments
 
-[Video Demo](https://youtube.com/)
+[Video Demo](https://youtu.be/eEzCtvtM390)
 
 A Simple Payments server written in Rust using the Axum Web Framework and Diesel ORM. \
 The Database used is PostgresDB, which is run in a docker container
