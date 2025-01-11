@@ -90,7 +90,7 @@ async fn main() {
         });
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
-    tracing::debug!("listening on {}", addr);
+    tracing::info!("Startng server: listening on {}", addr);
     let listener = TcpListener::bind(addr).await.unwrap();
 
     // Run the server with graceful shutdown
